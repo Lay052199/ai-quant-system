@@ -29,6 +29,18 @@ def calculate_annual_return(result_df: pd.DataFrame) -> float:
     return (1 + total_return) ** (365 / days) - 1
 
 
+def calculate_benchmark_return(result_df: pd.DataFrame) -> float:
+    """计算基准总收益率。"""
+    if result_df.empty or "benchmark_nav" not in result_df.columns:
+        return 0.0
+    return float(result_df["benchmark_nav"].iloc[-1] - 1)
+
+
+def calculate_excess_return(result_df: pd.DataFrame) -> float:
+    """计算超额收益率。"""
+    return calculate_total_return(result_df) - calculate_benchmark_return(result_df)
+
+
 def calculate_max_drawdown(result_df: pd.DataFrame) -> float:
     """计算最大回撤。"""
     if result_df.empty:
@@ -85,6 +97,8 @@ def calculate_metrics(result_df: pd.DataFrame, trades_df: pd.DataFrame) -> Dict[
 
     return {
         "总收益率": calculate_total_return(result_df),
+        "基准收益率": calculate_benchmark_return(result_df),
+        "超额收益率": calculate_excess_return(result_df),
         "年化收益率": calculate_annual_return(result_df),
         "最大回撤": calculate_max_drawdown(result_df),
         "夏普比率": calculate_sharpe_ratio(result_df),

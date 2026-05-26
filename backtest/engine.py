@@ -12,6 +12,7 @@ def run_backtest(
     initial_cash: float = 100000,
     commission_rate: float = 0.0003,
     slippage_rate: float = 0.0002,
+    benchmark_df: pd.DataFrame | None = None,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """执行单标的历史回测。
 
@@ -25,6 +26,7 @@ def run_backtest(
         initial_cash: 初始资金。
         commission_rate: 手续费率。
         slippage_rate: 滑点率。
+        benchmark_df: 基准指数行情数据，至少包含 date 和 close。
 
     返回:
         result_df: 每日资金曲线与执行记录。
@@ -42,6 +44,18 @@ def run_backtest(
     result_df["signal"] = pd.to_numeric(result_df["signal"], errors="coerce").fillna(0).astype(int)
     result_df["executed_signal"] = result_df["signal"].shift(1).fillna(0).astype(int)
 
+    if benchmark_df is not None and not benchmark_df.empty:
+        benchmark_clean = benchmark_df[["date", "close"]].copy()
+        benchmark_clean["date"] = pd.to_datetime(benchmark_clean["date"], errors="coerce")
+        benchmark_clean["close"] = pd.to_numeric(benchmark_clean["close"], errors="coerce")
+        benchmark_clean = benchmark_clean.dropna(subset=["date", "close"]).sort_values("date")
+        benchmark_clean = benchmark_clean.rename(columns={"close": "benchmark_close"})
+        result_df = result_df.merge(benchmark_clean, on="date", how="left")
+    else:
+        result_df["benchmark_close"] = result_df["close"]
+
+    result_df["benchmark_close"] = result_df["benchmark_close"].ffill().bfill()
+
     cash = float(initial_cash)
     shares = 0
     position = 0
@@ -56,9 +70,9 @@ def run_backtest(
 
     previous_total_value = float(initial_cash)
     strategy_returns = []
-    benchmark_returns = result_df["close"].pct_change().fillna(0)
+    benchmark_returns = result_df["benchmark_close"].pct_change().fillna(0)
 
-    for row in result_df.itertuples(index=False):
+    for idx, row in enumerate(result_df.itertuples(index=False)):
         executed_signal = int(row.executed_signal)
         close_price = float(row.close)
         trade_flag = 0
@@ -77,6 +91,7 @@ def run_backtest(
                     "buy_date": row.date,
                     "buy_price": buy_price,
                     "shares": shares,
+                    "buy_signal_date": result_df.iloc[idx - 1]["date"] if idx > 0 else pd.NaT,
                 }
 
         elif executed_signal == -1 and position == 1 and shares > 0:
@@ -92,8 +107,10 @@ def run_backtest(
             trades.append(
                 {
                     "buy_date": open_trade["buy_date"],
+                    "buy_signal_date": open_trade.get("buy_signal_date"),
                     "buy_price": round(open_trade["buy_price"], 4),
                     "sell_date": row.date,
+                    "sell_signal_date": result_df.iloc[idx - 1]["date"] if idx > 0 else pd.NaT,
                     "sell_price": round(sell_price, 4),
                     "shares": shares,
                     "profit": round(profit, 4),
@@ -129,8 +146,10 @@ def run_backtest(
         trades.append(
             {
                 "buy_date": open_trade["buy_date"],
+                "buy_signal_date": open_trade.get("buy_signal_date"),
                 "buy_price": round(open_trade["buy_price"], 4),
                 "sell_date": pd.NaT,
+                "sell_signal_date": pd.NaT,
                 "sell_price": None,
                 "shares": shares,
                 "profit": round(unrealized_profit, 4),
@@ -145,14 +164,25 @@ def run_backtest(
     result_df["total_value"] = total_value_history
     result_df["strategy_return"] = pd.Series(strategy_returns).fillna(0)
     result_df["benchmark_return"] = benchmark_returns
+    result_df["strategy_nav"] = result_df["total_value"] / float(initial_cash) if initial_cash else 0
+    result_df["benchmark_nav"] = (1 + result_df["benchmark_return"]).cumprod()
+    excess_base = result_df["benchmark_nav"].replace(0, pd.NA)
+    result_df["excess_nav"] = (result_df["strategy_nav"] / excess_base).astype("float64")
+    result_df["excess_nav"] = result_df["excess_nav"].ffill().fillna(1.0)
+    result_df["excess_return"] = result_df["strategy_return"] - result_df["benchmark_return"]
+    result_df["drawdown"] = result_df["strategy_nav"] / result_df["strategy_nav"].cummax() - 1
     result_df["trade_flag"] = trade_flags
+    result_df["buy_marker"] = result_df["close"].where(result_df["trade_flag"] == 1)
+    result_df["sell_marker"] = result_df["close"].where(result_df["trade_flag"] == -1)
 
     trades_df = pd.DataFrame(
         trades,
         columns=[
             "buy_date",
+            "buy_signal_date",
             "buy_price",
             "sell_date",
+            "sell_signal_date",
             "sell_price",
             "shares",
             "profit",
