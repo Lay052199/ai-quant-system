@@ -133,3 +133,8 @@ py -m streamlit run app.py
 ## 风险声明
 
 本项目仅用于学习、研究和模拟分析，不构成任何投资建议，不保证盈利，不应直接用于实盘交易。
+# AI 量化策略研究与回测系统
+
+[在线演示](https://ai-quant-system.streamlit.app/) ｜ GitHub 项目
+
+基于 Python、AKShare 与 Streamlit 的 A 股量化策略研究平台，支持真实历史行情获取、策略回测、风险指标评估与可视化展示。
