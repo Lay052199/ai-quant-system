@@ -138,3 +138,11 @@ py -m streamlit run app.py
 [在线演示](https://ai-quant-system.streamlit.app/) ｜ GitHub 项目
 
 基于 Python、AKShare 与 Streamlit 的 A 股量化策略研究平台，支持真实历史行情获取、策略回测、风险指标评估与可视化展示。
+## API 后端接口
+
+本项目在 Streamlit 网页版基础上，进一步封装了 FastAPI 后端服务，为后续接入微信小程序、移动端 App 或前后端分离网页提供接口基础。
+
+### 启动 API 服务
+
+```bash
+py -m uvicorn api_server:app --reload
