@@ -107,6 +107,7 @@ py -m uvicorn api_server:app --reload
 - 小程序前端代码位于根目录的 `pages/index/`
 - 当前小程序默认请求本地地址 `http://127.0.0.1:8000`
 - 开发阶段需在微信开发者工具中勾选“不校验合法域名”
+- 当前云端版本可通过微信小程序云开发 `wx.cloud.callContainer` 调用 CloudBase 云托管中的 FastAPI 后端
 
 ## 示例股票代码
 
