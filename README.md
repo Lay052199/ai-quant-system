@@ -174,3 +174,16 @@ py -m uvicorn api_server:app --reload
 ## 风险声明
 
 本项目仅用于学习、研究和模拟分析，不构成任何投资建议，不保证盈利，不应直接用于实盘交易。
+
+## 云端接口调用
+
+本小程序已接入腾讯云 CloudBase 云托管服务，通过 `wx.cloud.callContainer` 调用 FastAPI 后端接口，实现移动端参数输入、策略回测和结果展示。
+
+当前云托管服务：
+
+- CloudBase 环境：ai-quant-api-d3g4j0npfe712172
+- 云托管服务名：ai-quant-api
+- 健康检查接口：/health
+- 回测接口：/api/backtest
+
+说明：本项目仅用于学习、研究和模拟回测展示，不包含真实交易、自动下单、登录、支付或投资建议功能。
