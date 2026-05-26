@@ -18,6 +18,8 @@
 - 支持批量回测结果导出 Excel
 - 提供净值曲线、回撤曲线和买卖点标记图
 - 通过 Streamlit 页面进行参数配置、图表展示和结果查看
+- 页面已针对手机浏览器进行移动端体验优化
+- 新增 FastAPI 后端服务，便于未来接入小程序、App 或其他前端
 
 ## 项目结构
 
@@ -77,6 +79,35 @@ cd ai_quant_system
 py -m streamlit run app.py
 ```
 
+## API 启动命令
+
+```powershell
+cd ai_quant_system
+py -m uvicorn api_server:app --reload
+```
+
+详细 API 文档见 [README_API.md](C:\Users\sy\Desktop\量化研究与模拟交易系统\ai_quant_system\README_API.md)。
+
+后端部署说明见 [README_DEPLOY.md](C:\Users\sy\Desktop\量化研究与模拟交易系统\ai_quant_system\README_DEPLOY.md)。
+
+腾讯云 CloudBase 云托管部署说明见 [README_CLOUDBASE.md](C:\Users\sy\Desktop\量化研究与模拟交易系统\ai_quant_system\README_CLOUDBASE.md)。
+
+## 微信小程序本地运行
+
+```powershell
+cd ai_quant_system
+py -m uvicorn api_server:app --reload
+```
+
+然后在微信开发者工具中打开项目根目录：
+`C:\Users\sy\Desktop\量化研究与模拟交易系统`
+
+说明：
+
+- 小程序前端代码位于根目录的 `pages/index/`
+- 当前小程序默认请求本地地址 `http://127.0.0.1:8000`
+- 开发阶段需在微信开发者工具中勾选“不校验合法域名”
+
 ## 示例股票代码
 
 - `000001` 平安银行
@@ -95,6 +126,7 @@ py -m streamlit run app.py
 - 中文策略分析报告 txt 导出
 - 风险评估与文本报告生成
 - Streamlit 可视化展示
+- 移动端优先表单、指标卡片和可滚动数据表
 - Windows + VS Code + PowerShell 环境运行支持
 
 ## 导出说明
@@ -113,6 +145,14 @@ py -m streamlit run app.py
 - 多股票输入格式为英文逗号分隔，例如 `000001,600519,300750`
 - 当前报告模块默认使用规则模板生成，不依赖 OpenAI API
 - 当前版本只支持历史研究与模拟分析，不包含实盘交易
+
+## 移动端体验
+
+- 主交互已从传统侧边栏改为移动优先表单，手机端更容易输入和点击
+- 默认优先展示股票代码、策略选择、回测按钮、收益指标、净值曲线和分析报告
+- 高级参数、交易记录、原始数据和敏感性分析被收纳到展开区域，减少小屏滚动负担
+- 核心指标改为卡片展示，交易记录与排行榜表格支持横向滚动
+- 图表在手机浏览器中使用自适应宽度显示，同时保留桌面端完整功能
 
 ## 云端部署说明
 
@@ -133,25 +173,3 @@ py -m streamlit run app.py
 ## 风险声明
 
 本项目仅用于学习、研究和模拟分析，不构成任何投资建议，不保证盈利，不应直接用于实盘交易。
-# AI 量化策略研究与回测系统
-
-[在线演示](https://ai-quant-system.streamlit.app/) ｜ GitHub 项目
-
-基于 Python、AKShare 与 Streamlit 的 A 股量化策略研究平台，支持真实历史行情获取、策略回测、风险指标评估与可视化展示。
-## API 后端接口
-
-本项目在 Streamlit 网页版基础上，进一步封装了 FastAPI 后端服务，为后续接入微信小程序、移动端 App 或前后端分离网页提供接口基础。
-
-### 启动 API 服务
-
-```bash
-py -m uvicorn api_server:app --reload
-## 微信小程序前端
-
-本项目已进一步扩展微信小程序前端，支持通过 FastAPI 后端接口调用量化回测服务，实现移动端参数输入、策略回测和结果展示。
-
-小程序当前为本地开发演示版，调用地址为：
-
-http://127.0.0.1:8000
-
-后续计划将 FastAPI 后端部署至云服务器，并通过 HTTPS 域名提供给小程序正式调用。
