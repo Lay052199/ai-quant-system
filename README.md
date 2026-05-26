@@ -146,3 +146,12 @@ py -m streamlit run app.py
 
 ```bash
 py -m uvicorn api_server:app --reload
+## 微信小程序前端
+
+本项目已进一步扩展微信小程序前端，支持通过 FastAPI 后端接口调用量化回测服务，实现移动端参数输入、策略回测和结果展示。
+
+小程序当前为本地开发演示版，调用地址为：
+
+http://127.0.0.1:8000
+
+后续计划将 FastAPI 后端部署至云服务器，并通过 HTTPS 域名提供给小程序正式调用。
