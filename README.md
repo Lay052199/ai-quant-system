@@ -108,10 +108,18 @@ py -m streamlit run app.py
 ## 回测说明
 
 - 默认基准指数为沪深 300，代码为 `000300`
+- 指数数据优先使用 AKShare 的 `index_zh_a_hist` 接口，并带本地缓存与异常回退机制
 - 为防止未来函数，所有策略信号均在下一交易日执行
 - 多股票输入格式为英文逗号分隔，例如 `000001,600519,300750`
 - 当前报告模块默认使用规则模板生成，不依赖 OpenAI API
 - 当前版本只支持历史研究与模拟分析，不包含实盘交易
+
+## 云端部署说明
+
+- `app.py` 依赖 `data.akshare_loader.get_index_daily` 获取基准指数历史行情
+- `get_index_daily` 当前已内置，优先使用 `AKShare.index_zh_a_hist`
+- 若云端环境 AKShare 某个指数接口临时不可用，程序会自动尝试备用指数接口，并给出清晰错误信息
+- 为降低 Streamlit Cloud 环境差异带来的问题，`requirements.txt` 已显式约束 `akshare>=1.18.63`
 
 ## 后续计划
 
